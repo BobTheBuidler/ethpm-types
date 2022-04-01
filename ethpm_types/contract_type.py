@@ -38,9 +38,12 @@ class Bytecode(BaseModel):
 
         return self_str
 
-    def to_bytes(self) -> Optional[HexBytes]:
+    def to_bytes(self) -> Optional[Union[HexBytes, bytes]]:
         if self.bytecode:
-            return HexBytes(self.bytecode)
+            try:
+                return HexBytes(self.bytecode)
+            except Exception:
+                return self.bytecode.encode()
 
         # TODO: Resolve links to produce dynamically linked bytecode
         return None
@@ -132,7 +135,7 @@ class ContractType(BaseModel):
     # NOTE: Field is optional if `ContractAlias` is the same as `ContractName`
     name: Optional[str] = Field(None, alias="contractName")
     source_id: Optional[str] = Field(None, alias="sourceId")
-    deployment_bytecode: Optional[Union[Bytecode], Dict] = Field(None, alias="deploymentBytecode")
+    deployment_bytecode: Optional[Bytecode] = Field(None, alias="deploymentBytecode")
     runtime_bytecode: Optional[Bytecode] = Field(None, alias="runtimeBytecode")
     # abi, userdoc and devdoc must conform to spec
     abi: List[ABI] = []
