@@ -1,4 +1,4 @@
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Union, Dict
 
 from hexbytes import HexBytes
 from pydantic import Field
@@ -132,7 +132,7 @@ class ContractType(BaseModel):
     # NOTE: Field is optional if `ContractAlias` is the same as `ContractName`
     name: Optional[str] = Field(None, alias="contractName")
     source_id: Optional[str] = Field(None, alias="sourceId")
-    deployment_bytecode: Optional[Bytecode] = Field(None, alias="deploymentBytecode")
+    deployment_bytecode: Optional[Union[Bytecode], Dict] = Field(None, alias="deploymentBytecode")
     runtime_bytecode: Optional[Bytecode] = Field(None, alias="runtimeBytecode")
     # abi, userdoc and devdoc must conform to spec
     abi: List[ABI] = []
