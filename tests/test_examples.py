@@ -1,4 +1,6 @@
+import json
 import os
+from pathlib import Path
 
 import github
 import pytest  # type: ignore
@@ -20,7 +22,6 @@ EXAMPLES_RAW_URL = "https://raw.githubusercontent.com/ethpm/ethpm-spec/master/ex
 )
 def test_examples(example_name):
     example = requests.get(f"{EXAMPLES_RAW_URL}/{example_name}/v3.json")
-    example_str = example.text.strip()  # NOTE: Some examples have extra newline
     example_json = example.json()
 
     if "invalid" not in example_name:
@@ -28,8 +29,15 @@ def test_examples(example_name):
         assert package.dict() == example_json
 
         # NOTE: Also make sure that the encoding is exactly the same (per EIP-2678)
-        assert package.json() == example_str
+        assert package.json() == example.text
 
     else:
         with pytest.raises((ValidationError, ValueError)):
             PackageManifest.parse_obj(example_json).dict()
+
+
+def test_open_zeppelin_contracts():
+    oz_manifest_file = Path(__file__).parent / "data" / "OpenZeppelinContracts.json"
+    manifest_dict = json.loads(oz_manifest_file.read_text())
+    package = PackageManifest.parse_obj(manifest_dict)
+    assert package.dict() == manifest_dict
