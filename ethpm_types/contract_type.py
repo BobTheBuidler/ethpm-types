@@ -238,6 +238,8 @@ class ABIList(List[ABILIST_T]):
             return False
 
 
+_contract_type_cache = {}
+
 class ContractType(BaseModel):
     """
     A serializable type representing the type of a contract.
@@ -303,6 +305,17 @@ class ContractType(BaseModel):
             repr_id = f"{repr_id} {name}"
 
         return f"<{repr_id}>"
+
+    def __new__(cls, *args, **kwargs) -> "ContractType":
+        # TODO see if this works with pydantic
+        # TODO fix cache key for unhashable types
+        cache_key = (args, kwargs)
+        try:
+            return _contract_type_cache[cache_key]
+        except KeyError:
+            instance = super().__new__(*args, **kwargs)
+            _contract_type_cache[cache_key] = instance
+            return instance
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, ContractType):
